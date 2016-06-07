@@ -11,10 +11,14 @@ in VS_OUT {
 
 uniform sampler2D shadowMap;
 
+
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 uniform bool shadows;
+//uniform int terran;
+
+//in vec4 vEyeSpacePos;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -54,7 +58,16 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
 void main()
 {
-    vec3 color = vec3(1.0,0.0,0.0);
+    
+    vec3 color = vec3(0.7,0.0,0.7);
+    
+    
+    
+    
+    
+    
+    
+    //color = vec3(1.0,0.0,0.0);
     vec3 normal = normalize(fs_in.Normal);
     vec3 lightColor = vec3(0.4);
     // Ambient
@@ -75,4 +88,5 @@ void main()
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
     
     FragColor = vec4(lighting, 1.0f);
+    //FragColor = vec4(1.0,0.0,0.0,1.0);
 }

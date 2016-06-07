@@ -49,6 +49,8 @@
 		3232BEEE1CDA77960087CB37 /* MatrixTransform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MatrixTransform.hpp; sourceTree = "<group>"; };
 		3232BEF01CDA79760087CB37 /* Geode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Geode.cpp; sourceTree = "<group>"; };
 		3232BEF11CDA79760087CB37 /* Geode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Geode.hpp; sourceTree = "<group>"; };
+		325E83431D06EAAE0098A550 /* plant_shader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plant_shader.frag; sourceTree = "<group>"; };
+		325E83441D06EAAE0098A550 /* plant_shader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plant_shader.vert; sourceTree = "<group>"; };
 		3281D6881CC751D900906D30 /* shader_point.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader_point.vert; sourceTree = "<group>"; };
 		3281D6891CC751D900906D30 /* shader_spot.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader_spot.vert; sourceTree = "<group>"; };
 		32AA1CCA1CC0B6F6002205F8 /* CSE167Project2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CSE167Project2; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -152,6 +154,8 @@
 				32AA1CD81CC0B7C0002205F8 /* shader.frag */,
 				32AA1CD91CC0B7C0002205F8 /* shader.h */,
 				32AA1CDA1CC0B7C0002205F8 /* shader.vert */,
+				325E83431D06EAAE0098A550 /* plant_shader.frag */,
+				325E83441D06EAAE0098A550 /* plant_shader.vert */,
 				32AA1CDB1CC0B7C0002205F8 /* Window.cpp */,
 				32AA1CDC1CC0B7C0002205F8 /* Window.h */,
 				32AA1CCD1CC0B6F6002205F8 /* main.cpp */,

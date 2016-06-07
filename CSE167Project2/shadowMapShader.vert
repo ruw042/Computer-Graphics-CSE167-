@@ -10,6 +10,8 @@ out VS_OUT {
     vec4 FragPosLightSpace;
 } vs_out;
 
+//out vec4 vEyeSpacePos;
+
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
@@ -22,4 +24,6 @@ void main()
     vs_out.Normal = transpose(inverse(mat3(model))) * normal;
     vs_out.TexCoords = texCoords;
     vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
+    
+    //vEyeSpacePos = vec4(position, 1.0);
 }

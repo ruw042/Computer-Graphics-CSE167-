@@ -35,6 +35,11 @@ MatrixTransform * plant;
 int grammar_choice = 1;
 int z_angle = 20;
 int y_angle = 120;
+float f_length = 2.5f;
+
+
+std::vector<glm::vec3> plantLocations;
+
 
 
 //texture data
@@ -111,7 +116,7 @@ std::vector<glm::vec3> ssaoKernel;
 std::vector<glm::vec3> ssaoNoise;
 GLuint noiseTexture;
 
-glm::vec3 lightPos = glm::vec3(2.0, 20.0, -2.0);
+glm::vec3 lightPos = glm::vec3(0.0, 100, 0.0);
 glm::vec3 lightColor = glm::vec3(1.0, 1.0, 1.0);
 
 
@@ -161,9 +166,91 @@ GLuint depthMap;
 GLint simpleDepthShader;
 GLint shadowMapShader;
 
+GLuint planeVAO;
+GLuint planeVBO;
+GLfloat planeVertices[] = {
+    // Positions          // Normals         // Texture Coords
+    25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 0.0f,
+    -25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 25.0f,
+    -25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    
+    25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 0.0f,
+    25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 25.0f,
+    - 25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 25.0f
+};
 
-
-
+GLuint cubeVAO = 0;
+GLuint cubeVBO = 0;
+void RenderCube()
+{
+    // Initialize (if necessary)
+    if (cubeVAO == 0)
+    {
+        GLfloat vertices[] = {
+            // Back face
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // Bottom-left
+            0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+            0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+            0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,  // top-right
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,  // bottom-left
+            -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,// top-left
+            // Front face
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+            0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom-right
+            0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  // top-right
+            0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top-left
+            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom-left
+            // Left face
+            -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+            -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
+            -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+            -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+            -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+            -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+            // Right face
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+            0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+            0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
+            0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-right
+            0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-left
+            0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+            // Bottom face
+            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+            0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
+            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,// bottom-left
+            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+            -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+            // Top face
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,// top-left
+            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+            0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,// top-left
+            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
+        };
+        glGenVertexArrays(1, &cubeVAO);
+        glGenBuffers(1, &cubeVBO);
+        // Fill buffer
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // Link vertex attributes
+        glBindVertexArray(cubeVAO);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+    // Render Cube
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
 
 
 
@@ -175,6 +262,7 @@ glm::mat4 Window::V;
 
 int initialized = 0;
 int effectmode = 0;
+glm::vec3 savedLight;
 
 
 
@@ -238,7 +326,10 @@ void DiamondSquare(unsigned x1, unsigned y1, unsigned x2, unsigned y2, float ran
 }
 void Window::redrawTerrain()
 {
-    terrainVBO();
+    for (int i = 0; i < MAP_X; i++)
+        for (int j = 0; j < MAP_Z; j++)
+            m_heightmap[i][j] = 0;
+    
     DiamondSquare(0, 0, 256, 256, 200, 256);
     InitializeTerrain();
     
@@ -304,6 +395,7 @@ void Window::redrawTerrain()
             
         }
     }
+    terrainVBO();
     
 }
 void Window::terrainVBO()
@@ -377,10 +469,10 @@ MatrixTransform *Window::make_plant() {
         rules1.push_back("1F-[2-F+F]+[3+F-F]");
         std::string start = "FF";
         int levels = 4;
-        float f_length = 2.5;
         
         Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, y_angle};
         plant = generatePlant(gram, cylinder);
+
         
     } else if (grammar_choice == 2) {
         std::vector<std::string> producers1 = *new std::vector<std::string>();
@@ -396,15 +488,94 @@ MatrixTransform *Window::make_plant() {
         
         std::string start = "X";
         int levels = 5;
-        float f_length = 2.5;
         
         Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, y_angle};
         plant = generatePlant(gram, cylinder);
+
     } else if (grammar_choice == 3) {
-        //        F=C0FF-[C1-F+F+F]+[C2+F-F-F]
+        std::vector<std::string> producers1 = *new std::vector<std::string>();
+        producers1.push_back("F");
+        
+        std::vector<std::string> rules1 = *new std::vector<std::string>();
+        
+        rules1.push_back("1FF-[2-F+F+F]+[3+F-F-F]");
+        
+        std::string start = "F";
+        int levels = 4;
+        
+        Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, y_angle};
+        plant = generatePlant(gram, cylinder);
+
+    } else if (grammar_choice == 4) {
+
+        return make_same_group();
     }
     return plant;
 }
+
+MatrixTransform * Window::make_same_group() {
+    
+    
+    
+    MatrixTransform * group = new MatrixTransform();
+    
+    std::string start = "F";
+    
+    for (int i = 0; i < 3; i++) {
+        
+        std::vector<std::string> producers1 = *new std::vector<std::string>();
+        
+        producers1.push_back("F");
+        
+        
+        
+        std::vector<std::string> rules1 = *new std::vector<std::string>();
+        
+        rules1.push_back(" 1F [ + 2F ] F [ - 2F ] F");
+        
+        
+        
+        int levels = 4;
+        
+        
+        
+        Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, 20};
+        
+        MatrixTransform *ind_plant = generatePlant(gram, cylinder);
+        
+        ind_plant->translate(glm::vec3(20*i, 0,0));
+        
+        group->addChild(ind_plant);
+        
+        
+        
+        start += "F";
+        
+    }
+    
+    
+    
+    return group;
+    
+}
+
+MatrixTransform * Window::make_forest() {
+    MatrixTransform *forest = new MatrixTransform();
+    for (std::vector<glm::vec3>::iterator it = plantLocations.begin() ; it != plantLocations.end(); ++it) {
+        MatrixTransform *ind_plant = make_plant();
+        glm::vec3 t = *it;
+        float xval = t.x*20;
+        float zval = t.z*20;
+        float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+        ind_plant->translate(glm::vec3(xval,yval,zval));
+        forest->addChild(ind_plant);
+    }
+    
+    forest->translate(glm::vec3(0,-1,0));
+    return forest;
+}
+
+//MatrixTransform
 
 
 
@@ -412,7 +583,7 @@ MatrixTransform *Window::make_plant() {
 void Window::initialize_objects()
 {
     //texture init
-    
+    //referenced http://www.codeproject.com/Articles/14154/OpenGL-Terrain-Generation-An-Introduction for terrain generation
     DiamondSquare(0, 0, 256, 256, 200, 256);
     imageData = LoadBitmapFile("/Users/katia/proj3CSE167/proj3CSE167/terrain2.bmp", &bitmapInfoHeader);
     
@@ -488,7 +659,12 @@ void Window::initialize_objects()
             i = i + 4;
         }
     }
-    
+    cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+    cam_look_at.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+    glm::vec3 vector = glm::normalize(glm::vec3(cam_pos - cam_look_at));
+    cam_pos = glm::vec3(cam_pos - vector);
+    cam_look_at = glm::vec3(cam_look_at - vector);
+    V = glm::lookAt(cam_pos, cam_look_at, cam_up);
     
     terrainVBO();
     
@@ -510,7 +686,27 @@ void Window::initialize_objects()
     //dragon = bunny;
     toDisplay = bunny;
     
+    
+    
+    plantLocations.push_back(glm::vec3(-1,0,0));
+    plantLocations.push_back(glm::vec3(-1,0,-1));
+    plantLocations.push_back(glm::vec3(-1,0,-2));
+    plantLocations.push_back(glm::vec3(-1,0,-3));
+    plantLocations.push_back(glm::vec3(0,0,-3));
+    plantLocations.push_back(glm::vec3(1,0,-3));
+    plantLocations.push_back(glm::vec3(2,0,-3));
+    plantLocations.push_back(glm::vec3(3,0,-3));
+    plantLocations.push_back(glm::vec3(3,0,-2));
+    plantLocations.push_back(glm::vec3(3,0,-1));
+    plantLocations.push_back(glm::vec3(3,0,0));
+    plantLocations.push_back(glm::vec3(2,0,0));
+    plantLocations.push_back(glm::vec3(1,0,0));
+    plantLocations.push_back(glm::vec3(1,0,-1));
+    // bunny coordinate @
+    // plantLocations.push_back(glm::vec3(2*20,0,-1*20));
+    
     plant = make_plant();
+    plant = make_forest();
     //    plant = new MatrixTransform(glm::mat4());
 //    Geode *g = new Geode(cylinder);
 //    dtest->addChild(g);
@@ -535,14 +731,14 @@ void Window::initialize_objects()
 #ifdef _WIN32 // Windows (both 32 and 64 bit versions)
 	shaderProgram = LoadShaders("../shader.vert", "../shader.frag");
 #else // Not windows
-	shaderProgram = LoadShaders("shader.vert", "shader.frag");
+	shaderProgram = LoadShaders("plant_shader.vert", "plant_shader.frag");
     skyboxShader = LoadShaders("skyboxShader.vert", "skyboxShader.frag");
     //shaderProgram = LoadShaders("skyboxShader.vert", "skyboxShader.frag");
     shaderGeometryPass = LoadShaders("ssao_geometry.vert", "ssao_geometry.frag");
     shaderLightingPass = LoadShaders("ssao.vert", "ssao_lighting.frag");
     shaderSSAO = LoadShaders("ssao.vert", "ssao.frag");
     shaderSSAOBlur = LoadShaders("ssao.vert", "ssao_blur.frag");
-    simpleDepthShader = LoadShaders("simpleDepthShader.vert","simpleDepthShader.farg");
+    simpleDepthShader = LoadShaders("simpleDepthShader.vert","simpleDepthShader.frag");
     shadowMapShader = LoadShaders("shadowMapShader.vert","shadowMapShader.frag");
     terrainProgram = LoadShaders("terrain.vert", "terrain.frag");
 #endif
@@ -678,6 +874,35 @@ void Window::initialize_objects()
     
     glClearColor(1.f, 0.0f, 0.0f, 1.0f);
     
+    glm::mat4 model;
+    float xval = 40.0f;
+    float zval = -20.0f;
+    float yval = 25 + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+    
+    model = glm::translate(glm::mat4(), glm::vec3(xval,yval,zval));
+    model = glm::scale(model,glm::vec3(10,10,10));
+    glUseProgram(shaderGeometryPass);
+    glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "model"), 1, GL_FALSE, &model[0][0]);
+    
+    
+    lightPos = glm::vec3(xval-15,yval+5,zval);
+    savedLight = lightPos;
+    //lightPos = glm::vec3(-2,4,-1);
+    
+    
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glBindVertexArray(0);
+
     
 
 
@@ -867,7 +1092,7 @@ void Window::idle_callback()
     //mt_root->update(glm::rotate(glm::mat4(1.0f), .0000001f, glm::vec3(0.0f, 1.0f, 0.0f)));
     //mt_arm111->update(glm::rotate(glm::mat4(1.0f), .001f, glm::vec3(0.0f, 1.0f, 0.0f)));
    
-    
+    plant->update(glm::mat4());
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -900,13 +1125,11 @@ void Window::display_callback(GLFWwindow* window)
     glUseProgram(shaderGeometryPass);
     glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "projection"), 1, GL_FALSE, &projection[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "view"), 1, GL_FALSE, &view[0][0]);
-    model = glm::translate(model, glm::vec3(0.0, 10.0f, 0.0f));
-    glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "model"), 1, GL_FALSE, &model[0][0]);
-    glUniform1i(glGetUniformLocation(shaderGeometryPass,"skyVert"),0);
+       
+    //glUniform1i(glGetUniformLocation(shaderGeometryPass,"skyVert"),0);
     bunny->draw(shaderGeometryPass); // SSAO BUNNY
-    model = glm::translate(model, glm::vec3(0.0, -1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(20.0f, 1.0f, 20.0f));
-    glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "model"), 1, GL_FALSE, &model[0][0]);
+    //plant->draw();
+    
     
     //RenderCube();
     
@@ -976,20 +1199,22 @@ void Window::display_callback(GLFWwindow* window)
     glUseProgram(skyboxShader);
     box->draw(skyboxShader);
     
-    glUseProgram(shaderProgram);
-    bunny->draw(shaderProgram); // non ssao bunny
+        glUseProgram(shaderProgram);
+        plant->draw();
+    //glUseProgram(shaderProgram);
+    //bunny->draw(shaderProgram); // non ssao bunny
     //dtest->draw();
 
-    plant->draw();
+    
     
     
     glUseProgram(terrainProgram);
-    glShadeModel(GL_SMOOTH);					   // use smooth shading
-    glEnable(GL_DEPTH_TEST);					   // hidden surface removal
+    //glShadeModel(GL_SMOOTH);					   // use smooth shading
+    //glEnable(GL_DEPTH_TEST);					   // hidden surface removal
     //    glEnable(GL_CULL_FACE);						   // do not calculate inside of poly's
     glFrontFace(GL_CCW);						      // counter clock-wise polygons are out
     
-    glEnable(GL_TEXTURE_2D);					   // enable 2D texturing
+    //glEnable(GL_TEXTURE_2D);					   // enable 2D texturing
     glm::mat4 MVP = Window::P * Window::V * glm::mat4(1.0f);
     // We need to calculate this because as of GLSL version 1.40 (OpenGL 3.1, released March 2009), gl_ModelViewProjectionMatrix has been
     // removed from the language. The user is expected to supply this matrix to the shader when using modern OpenGL.
@@ -1012,19 +1237,19 @@ void Window::display_callback(GLFWwindow* window)
     glBindVertexArray(0);
     
     // enable blending
-    glEnable(GL_BLEND);
+    //glEnable(GL_BLEND);
     
     // enable read-only depth buffer
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
     
     // set the blend function to what we use for transparency
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     
     // set back to normal depth buffer mode (writable)
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE);
     
     // disable blending
-    glDisable(GL_BLEND);
+    //glDisable(GL_BLEND);
 
     }
     else{
@@ -1032,7 +1257,7 @@ void Window::display_callback(GLFWwindow* window)
     
     
     
-    /*
+    
     //shadow map
     GLfloat currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
@@ -1043,8 +1268,8 @@ void Window::display_callback(GLFWwindow* window)
     glm::mat4 lightProjection, lightView;
     glm::mat4 lightSpaceMatrix;
     GLfloat near_plane = 1.0f, far_plane = 7.5f;
-    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    //lightProjection = glm::perspective(45.0f, (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // Note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene.
+    //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightProjection = glm::perspective(45.0f, (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // Note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene.
     lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
     lightSpaceMatrix = lightProjection * lightView;
     // - now render scene from light's point of view
@@ -1052,11 +1277,30 @@ void Window::display_callback(GLFWwindow* window)
     glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
     glm::mat4 model = glm::mat4(1.f);
     glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "model"), 1, GL_FALSE, &model[0][0]);
-    
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glClear(GL_DEPTH_BUFFER_BIT);
-    bunny->draw(simpleDepthShader);
+        glBindVertexArray(planeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+            model = glm::mat4(1.f);
+        glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "model"), 1, GL_FALSE, &model[0][0]);
+        // Cubes
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+        glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "model"), 1, GL_FALSE, &model[0][0]);
+        RenderCube();
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+        glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "model"), 1, GL_FALSE, &model[0][0]);
+        RenderCube();
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+        model = glm::rotate(model, 60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+        model = glm::scale(model, glm::vec3(0.5));
+        glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader, "model"), 1, GL_FALSE, &model[0][0]);
+        //RenderCube();
+        bunny->draw(simpleDepthShader);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     // 2. Render scene as normal
@@ -1078,12 +1322,35 @@ void Window::display_callback(GLFWwindow* window)
     glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
     // Enable/Disable shadows by pressing 'SPACE'
     glUniform1i(glGetUniformLocation(shadowMapShader, "shadows"), shadows);
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    bunny->draw(shadowMapShader);
+        
+        glBindVertexArray(planeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        model = glm::mat4(1.f);
+        glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "model"), 1, GL_FALSE, &model[0][0]);
+        // Cubes
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+        glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "model"), 1, GL_FALSE, &model[0][0]);
+        RenderCube();
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+        glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "model"), 1, GL_FALSE, &model[0][0]);
+        RenderCube();
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+        model = glm::rotate(model, 60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+        model = glm::scale(model, glm::vec3(0.5));
+        glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "model"), 1, GL_FALSE, &model[0][0]);
+        //RenderCube();
+        bunny->draw(shadowMapShader);
+
     
     
-    */
+    
     /*
     glUseProgram(shaderProgram);
 	// Render the cube
@@ -1281,7 +1548,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     // Check for a key press
-    if (action == GLFW_PRESS)
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         // Check if escape was pressed
         if (key == GLFW_KEY_ESCAPE)
@@ -1289,34 +1556,198 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             // Close the window. This causes the program to also terminate.
             glfwSetWindowShouldClose(window, GL_TRUE);
         }
+        
+        else if (key == 'B') //redraw terrain
+        {
+            redrawTerrain();
+        }
+        else if (key == 'Z') //zoom out
+        {
+            cam_pos.y = 15.0f + cam_pos.y ;
+            V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        }
+
+        else if (key == 'W') //move forward
+        {
+            cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            cam_look_at.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            glm::vec3 vector = glm::normalize(glm::vec3(cam_pos - cam_look_at)) * 4.0f;
+            cam_pos = glm::vec3(cam_pos - vector);
+            cam_look_at = glm::vec3(cam_look_at - vector);
+            V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        }
+        else if (key == 'D') //move right
+        {
+            
+            cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            cam_look_at.y = 15.0f + terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            glm::vec3 vector = glm::normalize(glm::vec3(cam_pos - cam_look_at));
+            vector = glm::rotate(vector, 90.0f/180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.f));
+            cam_pos = glm::vec3(cam_pos + vector);
+            cam_look_at = glm::vec3(cam_look_at + vector);
+            
+            V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        }
+        else if (key == 'S') //move backwards
+        {
+            cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            cam_look_at.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            glm::vec3 vector = glm::normalize(glm::vec3(cam_pos - cam_look_at)) * 4.0f;
+            cam_pos = glm::vec3(cam_pos + vector);
+            cam_look_at = glm::vec3(cam_look_at + vector);
+            V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        }
+        else if (key == 'A') //move left
+        {
+            cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            cam_look_at.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            
+            glm::vec3 vector = glm::normalize(glm::vec3(cam_pos - cam_look_at));
+            vector = glm::rotate(vector, -90.0f/180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.f));
+            cam_pos = glm::vec3(cam_pos + vector);
+            cam_look_at = glm::vec3(cam_look_at + vector);
+            
+            V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        }
+        else if (key == 'Q')//rotate left
+        {
+            glm::vec3 rotAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+            float  rot_angle = 5.f;
+            if (rotAxis.length() > 0)
+            {
+//                cam_pos = glm::vec3(glm::rotate(glm::mat4(1.f), rot_angle/180.0f * glm::pi<float>(), rotAxis)*glm::vec4(cam_pos,1.f));
+                cam_look_at = glm::vec3(glm::rotate(glm::mat4(1.f), rot_angle/180.0f * glm::pi<float>(), rotAxis)*glm::vec4(cam_look_at,1.f));
+                //cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+                cam_look_at.y =  terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+                V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+            }
+        }
+        else if (key == 'E')//rotate right
+        {
+            glm::vec3 rotAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+            float  rot_angle = -5.f;
+            if (rotAxis.length() > 0)
+            {
+//                cam_pos = glm::vec3(glm::rotate(glm::mat4(), rot_angle/180.0f * glm::pi<float>(), rotAxis)*glm::vec4(cam_pos,1.f));
+                cam_look_at = glm::vec3(glm::rotate(glm::mat4(1.f), rot_angle/180.0f * glm::pi<float>(), rotAxis)*glm::vec4(cam_look_at,1.f));
+                //cam_pos.y = 15.0f+ terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+                cam_look_at.y =  terrain[(int)ceil(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)ceil(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+                
+                V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+            }
+        } else if (key == GLFW_KEY_1) {
+            grammar_choice = 1;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 30.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_2) {
+            grammar_choice = 2;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_3) {
+            grammar_choice = 3;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+            
+        } else if (key == GLFW_KEY_4) {
+            grammar_choice = 4;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_EQUAL) {
+            z_angle++;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_MINUS) {
+            z_angle--;
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_F) {
+            if (mods == GLFW_MOD_SHIFT) {
+                f_length++;
+            } else {
+                f_length--;
+            }
+            plant = make_plant();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        } else if (key == GLFW_KEY_C) {
+//            plant = make_same_group();
+            float xval = 0.0f*20;
+            float zval = 0.0f*20;
+            float yval = 15.0f + terrain[(int)floor(((cam_pos.x + 1000.f) / MAP_SCALE))][(int)floor(((cam_pos.z - 10000.f) / (-1.f*MAP_SCALE)))][1];
+            plant->translate(glm::vec3(xval,yval,zval));
+        }
+        else if (key == GLFW_KEY_SPACE){
+            if(effectmode == 0)
+            {
+                cam_pos = glm::vec3(0,0,3.0f);
+                cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+                lightPos = glm::vec3(-2,4,-1);
+                effectmode = 1;
+                //display_callback(window);
+            }
+            else
+            {
+                effectmode = 0;
+                cam_pos = glm::vec3(0.0f, 0.0f, 20.0f);		// e  | Position of camera
+                cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+                lightPos = savedLight;
+                //display_callback(window);
+                
+            }
+        }
+        
+        
+        
        
         glGetFloatv(GL_POINT_SIZE, &size);
         if( mods&GLFW_MOD_SHIFT )
         {
-            if (key == GLFW_KEY_P)
-            {
-                glPointSize(size+1);
-            }
-            if (key == GLFW_KEY_X)
-            {
-                toDisplay->move('X');
-            }
-            if (key == GLFW_KEY_Y)
-            {
-                toDisplay->move('Y');
-            }
-            if (key == GLFW_KEY_Z)
-            {
-                toDisplay->move('Z');
-            }
-            if (key == GLFW_KEY_S)
-            {
-                toDisplay->move('S');
-            }
-            if (key == GLFW_KEY_O)
-            {
-                toDisplay->move('O');
-            }
+
+            
+//            if (key == GLFW_KEY_P)
+//            {
+//                glPointSize(size+1);
+//            }
+//            if (key == GLFW_KEY_X)
+//            {
+//                toDisplay->move('X');
+//            }
+//            if (key == GLFW_KEY_Y)
+//            {
+//                toDisplay->move('Y');
+//            }
+//            if (key == GLFW_KEY_Z)
+//            {
+//                toDisplay->move('Z');
+//            }
+//            if (key == GLFW_KEY_S)
+//            {
+//                toDisplay->move('S');
+//            }
+//            if (key == GLFW_KEY_O)
+//            {
+//                toDisplay->move('O');
+//            }
         }
         else
         {
@@ -1336,10 +1767,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             {
                 toDisplay->move('z');
             }
-            if (key == GLFW_KEY_S)
-            {
-                toDisplay->move('s');
-            }
+            
             if (key == GLFW_KEY_O)
             {
                 toDisplay->move('o');
@@ -1389,21 +1817,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
             else
                 mode = 0;
         }
-        if (key == GLFW_KEY_1)
-        {
-            lightType = 1;
-            shaderProgram = LoadShaders("shader.vert", "shader.frag");
-        }
-        if (key == GLFW_KEY_2)
-        {
-            lightType = 2;
-            shaderProgram = LoadShaders("shader_point.vert", "shader.frag");
-        }
-        if (key == GLFW_KEY_3)
-        {
-            lightType = 3;
-            shaderProgram = LoadShaders("shader_spot.vert", "shader.frag");
-        }
+
         
     }
 }

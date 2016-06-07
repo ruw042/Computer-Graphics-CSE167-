@@ -9,6 +9,7 @@
 #include "Geode.hpp"
 #include "Window.h"
 
+extern GLint shaderGeometryPass;
 extern GLint shaderProgram;
 
 Geode::Geode(OBJObject * obj)
@@ -21,5 +22,5 @@ void Geode::update(glm::mat4 C)
 }
 void Geode::draw()
 {
-    toDraw->draw(shaderProgram);
+    toDraw->draw(shaderProgram, M);
 }

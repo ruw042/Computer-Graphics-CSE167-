@@ -12,14 +12,15 @@ uniform mat4 MVP;
 uniform mat4 m_viewModel;
 uniform vec3 Light;
 uniform mat3 NM;
-uniform vec4 diffuse;
-uniform vec4 ambient;
-uniform vec4 specular;
+uniform vec3 diffuse;
+uniform vec3 ambient;
+uniform vec3 specular;
 uniform float shiness;
 
 //in vec2 vertTexCoord;
 
 out vec4 outColor;
+uniform vec3 objColor;
 
 
 
@@ -43,10 +44,11 @@ void main()
         
         // compute the specular term into spec
         float intSpec = max(dot(h,n), 0.0);
-        spec = specular * pow(intSpec, shiness);
+        spec = vec4(specular,1.0) * pow(intSpec, shiness);
     }
     // add the specular term
-    outColor = intensity *  diffuse + spec+ ambient;
+    outColor = intensity *  vec4(diffuse,1.0) + spec+ vec4(ambient,1.0);
+    //outColor = vec4(objColor,1.0);
     
     
     gl_Position = MVP * vec4(position.x, position.y, position.z, 1.0);

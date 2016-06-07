@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "skybox.hpp"
 #include "MatrixTransform.hpp"
+#include <glm/gtx/rotate_vector.hpp>
 #include "Geode.hpp"
 
 class Window
@@ -35,6 +36,8 @@ public:
     static glm::vec3 trackBallMapping(float xpos,float ypos);
     
     static MatrixTransform *make_plant();
+    static MatrixTransform * make_forest();
+    static MatrixTransform * make_same_group();
 };
 
 #endif

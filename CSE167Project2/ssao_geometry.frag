@@ -7,6 +7,8 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
+uniform vec3 objColor;
+
 const float NEAR = 0.1; // Projection matrix's near plane distance
 const float FAR = 50.0f; // Projection matrix's far plane distance
 float LinearizeDepth(float depth)

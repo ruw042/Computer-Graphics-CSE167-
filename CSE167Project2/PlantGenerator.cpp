@@ -23,19 +23,20 @@ struct Save {
     int x_angle;
 };
 
+
 //extern OBJObject *cylinder;
 
 MatrixTransform *generatePlant(Grammar grammar, OBJObject *cylinder) {
     std::string grammarStr = expandGrammerToLevel(grammar, grammar.levels);
         
-    MatrixTransform *plant = new MatrixTransform(glm::mat4());
+    MatrixTransform *plant = new MatrixTransform();
     
-    MatrixTransform *mt_cyl = new MatrixTransform(glm::mat4());
+    MatrixTransform *mt_cyl = new MatrixTransform();
     
-//    Material chrome = {glm::vec3(0.39f,0.19f,0.0f),
-//        glm::vec3(0.5,0.5,0.5),
-//        glm::vec3(0.20, 0.20, 0.20),
-//        10.0};
+    Material wood = {glm::vec3(0.39f,0.19f,0.0f),
+        glm::vec3(0.5,0.5,0.5),
+        glm::vec3(0.20, 0.20, 0.20),
+        10.0};
     
     Geode *g_cyl = new Geode(cylinder);
 //    Cylinder *g_cyl = new Cylinder();
@@ -65,16 +66,18 @@ MatrixTransform *generatePlant(Grammar grammar, OBJObject *cylinder) {
         if (*it == 'F' || *it == 'Y') {
             // Add a Cylinder as a child at the end
 
-            MatrixTransform *wrapper = new MatrixTransform(glm::mat4());
-            MatrixTransform *direct_wrapper = new MatrixTransform(glm::mat4());
+            MatrixTransform *wrapper = new MatrixTransform();
+            MatrixTransform *direct_wrapper = new MatrixTransform();
 
             Geode *g_cyl = new Geode(cylinder);
             OBJObject *cc = new OBJObject(cylinder->vertices, cylinder->normals, cylinder->indices);
-            cc->material = chrome;
+            cc->material = wood;
             cc->material.ambient = color;
+            cc->isPlant = true;
             g_cyl->toDraw = cc;
-            ((OBJObject *)(g_cyl->toDraw))->special = color;
+//            ((OBJObject *)(g_cyl->toDraw))->special = color;
             g_cyl->update(glm::mat4(1.0f));
+            
             
             direct_wrapper->addChild(g_cyl);
 //            if (glevel != 2) {

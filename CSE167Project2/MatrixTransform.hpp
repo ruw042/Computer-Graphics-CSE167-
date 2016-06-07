@@ -22,9 +22,14 @@
 class MatrixTransform : public Group
 {
 public:
-    MatrixTransform(glm::mat4 mat);
+//    MatrixTransform(glm::mat4 mat);
+//    MatrixTransform();
     void update(glm::mat4 C);
     glm::mat4 MT = glm::mat4(1.0f);
+    
+    void translate(glm::vec3 amount);
+    void scale(glm::vec3 scale);
+    void rotate(float angle, glm::vec3 axis);
 };
 
 
