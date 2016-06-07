@@ -175,7 +175,7 @@ void Skybox::draw(GLuint shaderProgram)
     //glCullFace(GL_BACK);
     // Calculate combination of the model (toWorld), view (camera inverse), and perspective matrices
     
-    glDepthMask(GL_FALSE);// Remember to turn depth writing off
+    //glDepthMask(GL_FALSE);// Remember to turn depth writing off
     glm::mat4 view = glm::mat4(glm::mat3(Window::V));	// Remove any translation component of the view matrix
     glm::mat4 MVP = Window::P * view * toWorld;
     // We need to calculate this because as of GLSL version 1.40 (OpenGL 3.1, released March 2009), gl_ModelViewProjectionMatrix has been
@@ -191,7 +191,7 @@ void Skybox::draw(GLuint shaderProgram)
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE);
 }
 unsigned char* Skybox::loadPPM(const char* filename, int& width, int& height)
 {

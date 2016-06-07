@@ -20,6 +20,8 @@
 		32AA1CE31CC0B9E9002205F8 /* libglfw.3.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32AA1CE21CC0B9E9002205F8 /* libglfw.3.1.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
 		32AA1CE51CC0BCA8002205F8 /* libGLEW.1.13.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32AA1CE41CC0BCA8002205F8 /* libGLEW.1.13.0.dylib */; };
 		32B578541CD9704E009E4E1C /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32B578521CD9704E009E4E1C /* Node.cpp */; };
+		32BC6F361D06A73200DFEC3A /* PlantGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32BC6F341D06A73200DFEC3A /* PlantGenerator.cpp */; };
+		32BC6F391D06A7AE00DFEC3A /* LSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32BC6F371D06A7AE00DFEC3A /* LSystem.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +74,10 @@
 		32BC6F311D0699D300DFEC3A /* terrain.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = terrain.frag; sourceTree = "<group>"; };
 		32BC6F321D0699D300DFEC3A /* terrain.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = terrain.vert; sourceTree = "<group>"; };
 		32BC6F331D0699D300DFEC3A /* vkgllib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vkgllib.h; sourceTree = "<group>"; };
+		32BC6F341D06A73200DFEC3A /* PlantGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlantGenerator.cpp; sourceTree = "<group>"; };
+		32BC6F351D06A73200DFEC3A /* PlantGenerator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlantGenerator.hpp; sourceTree = "<group>"; };
+		32BC6F371D06A7AE00DFEC3A /* LSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LSystem.cpp; sourceTree = "<group>"; };
+		32BC6F381D06A7AE00DFEC3A /* LSystem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LSystem.hpp; sourceTree = "<group>"; };
 		32E37A891D012B4D001F7D83 /* ssao_geometry.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ssao_geometry.vert; sourceTree = "<group>"; };
 		32E37A8A1D012B4D001F7D83 /* ssao.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ssao.vert; sourceTree = "<group>"; };
 		32E37A8B1D012BD9001F7D83 /* ssao_blur.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ssao_blur.frag; sourceTree = "<group>"; };
@@ -118,6 +124,10 @@
 			children = (
 				32BC6F311D0699D300DFEC3A /* terrain.frag */,
 				32BC6F321D0699D300DFEC3A /* terrain.vert */,
+				32BC6F341D06A73200DFEC3A /* PlantGenerator.cpp */,
+				32BC6F351D06A73200DFEC3A /* PlantGenerator.hpp */,
+				32BC6F371D06A7AE00DFEC3A /* LSystem.cpp */,
+				32BC6F381D06A7AE00DFEC3A /* LSystem.hpp */,
 				32BC6F331D0699D300DFEC3A /* vkgllib.h */,
 				32BC6F2D1D06433E00DFEC3A /* shadowMapShader.frag */,
 				32BC6F2E1D06433E00DFEC3A /* shadowMapShader.vert */,
@@ -216,7 +226,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				322636D11CD6B36700DD5823 /* skybox.cpp in Sources */,
+				32BC6F391D06A7AE00DFEC3A /* LSystem.cpp in Sources */,
 				32B578541CD9704E009E4E1C /* Node.cpp in Sources */,
+				32BC6F361D06A73200DFEC3A /* PlantGenerator.cpp in Sources */,
 				32AA1CDE1CC0B7C0002205F8 /* shader.cpp in Sources */,
 				32AA1CDD1CC0B7C0002205F8 /* Cube.cpp in Sources */,
 				32AA1CCE1CC0B6F6002205F8 /* main.cpp in Sources */,

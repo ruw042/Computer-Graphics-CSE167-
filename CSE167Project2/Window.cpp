@@ -4,6 +4,10 @@
 #include <random>
 
 #include "vkgllib.h"
+
+#include "PlantGenerator.hpp"
+#include "LSystem.hpp"
+
 const char* window_title = "GLFW Starter Project";
 GLfloat size;
 int mode = 0;
@@ -21,6 +25,17 @@ OBJObject * dragon;
 OBJObject * cylinder;
 OBJObject * pod;
 OBJObject * lichKing;
+
+
+
+// Plant stuff
+
+MatrixTransform * plant;
+
+int grammar_choice = 1;
+int z_angle = 20;
+int y_angle = 120;
+
 
 //texture data
 struct VertexTerrain {
@@ -159,6 +174,7 @@ glm::mat4 Window::P;
 glm::mat4 Window::V;
 
 int initialized = 0;
+int effectmode = 0;
 
 
 
@@ -349,6 +365,46 @@ GLfloat lerp(GLfloat a, GLfloat b, GLfloat f)
 
 
 
+MatrixTransform *Window::make_plant() {
+    if (grammar_choice == 1) {
+        std::vector<std::string> producers1 = *new std::vector<std::string>();
+        producers1.push_back("F");
+        
+        std::vector<std::string> rules1 = *new std::vector<std::string>();
+        //    rules.push_back("FF-[-F+F+F]+[+F-F-F]");
+        //    rules.push_back("1FF-[2-F+F+F]+[3+F-F-F]");
+        //    rules.push_back("1FF-[2-F+F]+[3+F-F]"); // good!!
+        rules1.push_back("1F-[2-F+F]+[3+F-F]");
+        std::string start = "FF";
+        int levels = 4;
+        float f_length = 2.5;
+        
+        Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, y_angle};
+        plant = generatePlant(gram, cylinder);
+        
+    } else if (grammar_choice == 2) {
+        std::vector<std::string> producers1 = *new std::vector<std::string>();
+        producers1.push_back("X");
+        producers1.push_back("F");
+        
+        std::vector<std::string> rules1 = *new std::vector<std::string>();
+        //    rules.push_back("FF-[-F+F+F]+[+F-F-F]");
+        //    rules.push_back("1FF-[2-F+F+F]+[3+F-F-F]");
+        //    rules.push_back("1FF-[2-F+F]+[3+F-F]"); // good!!
+        rules1.push_back("1F-[3[X]+4X]+2F[4+FX]-X");
+        rules1.push_back("FF");
+        
+        std::string start = "X";
+        int levels = 5;
+        float f_length = 2.5;
+        
+        Grammar gram = {producers1, rules1, start, f_length, levels, z_angle, y_angle};
+        plant = generatePlant(gram, cylinder);
+    } else if (grammar_choice == 3) {
+        //        F=C0FF-[C1-F+F+F]+[C2+F-F-F]
+    }
+    return plant;
+}
 
 
 
@@ -454,7 +510,11 @@ void Window::initialize_objects()
     //dragon = bunny;
     toDisplay = bunny;
     
-    
+    plant = make_plant();
+    //    plant = new MatrixTransform(glm::mat4());
+//    Geode *g = new Geode(cylinder);
+//    dtest->addChild(g);
+////    dtest->draw();
     
     bunnyMat.spec = glm::vec4(0.628281f,0.555802f,0.366065f,1.f);
     bunnyMat.shine = 51.2;
@@ -688,6 +748,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
+    
     if(initialized == 1)
     {
     //ssao related
@@ -820,6 +881,8 @@ void Window::display_callback(GLFWwindow* window)
     //glUseProgram(skyboxShader);
     
 
+    if(effectmode == 0)
+    {
 
     //SSAO
     GLfloat currentFrame = glfwGetTime();
@@ -840,7 +903,7 @@ void Window::display_callback(GLFWwindow* window)
     model = glm::translate(model, glm::vec3(0.0, 10.0f, 0.0f));
     glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "model"), 1, GL_FALSE, &model[0][0]);
     glUniform1i(glGetUniformLocation(shaderGeometryPass,"skyVert"),0);
-    bunny->draw(shaderGeometryPass);
+    bunny->draw(shaderGeometryPass); // SSAO BUNNY
     model = glm::translate(model, glm::vec3(0.0, -1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(20.0f, 1.0f, 20.0f));
     glUniformMatrix4fv(glGetUniformLocation(shaderGeometryPass, "model"), 1, GL_FALSE, &model[0][0]);
@@ -910,11 +973,14 @@ void Window::display_callback(GLFWwindow* window)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     
-    //glUseProgram(skyboxShader);
-    //box->draw(skyboxShader);
+    glUseProgram(skyboxShader);
+    box->draw(skyboxShader);
     
     glUseProgram(shaderProgram);
     bunny->draw(shaderProgram); // non ssao bunny
+    //dtest->draw();
+
+    plant->draw();
     
     
     glUseProgram(terrainProgram);
@@ -960,8 +1026,8 @@ void Window::display_callback(GLFWwindow* window)
     // disable blending
     glDisable(GL_BLEND);
 
-    
-    
+    }
+    else{
     
     
     
@@ -1027,7 +1093,7 @@ void Window::display_callback(GLFWwindow* window)
     bunny->draw(shaderProgram);*/
    
     //sleep(1000);
-    
+    }
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
